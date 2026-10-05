@@ -38,18 +38,31 @@
             <li><a href="education.html">Education</a></li>
             <li><a href="skills.html">Skills</a></li>
             <li><a href="projects.html">Projects</a></li>
+            <li><a href="certifications.html">Certifications</a></li>
+            <li><a href="resume.html">Resume</a></li>
+            <li><a href="blog.html">Blog</a></li>
             <li><a href="contact.html">Contact</a></li>
         </ul>
     </nav>
 
     <main class="home-page">
+        <!-- Hero Section -->
         <section class="hero reveal">
             <div class="hero-text">
-                <h1>Yatharth Mishra</h1>
+                <p class="hero-welcome">
+                    <span class="welcome-line"></span>
+                    <span class="welcome-label">Welcome to my portfolio</span>
+                </p>
 
-                <h2 class="hero-typing">
-                    <span id="typing-text">Computer Science Undergraduate</span><span
-                        class="typing-cursor">&nbsp;</span>
+                <h1 class="hero-name">Yatharth Mishra</h1>
+
+                <h2 class="hero-role-title">
+                    <span class="role-rotator" id="hero-role-rotator">
+                        <span class="role-item active">Computer Science Undergraduate</span>
+                        <span class="role-item">Software &amp; Systems Developer</span>
+                        <span class="role-item">Problem Solver &amp; Tech Explorer</span>
+                        <span class="role-item">Badminton Enthusiast &amp; Flautist</span>
+                    </span>
                 </h2>
 
                 <p class="hero-description">
@@ -60,15 +73,17 @@
                 </p>
 
                 <div class="hero-tags">
-                    <span>💻 Developer</span>
-                    <span>🎓 Student</span>
-                    <span>🏸 Badminton Player</span>
-                    <span>🪈 Flautist</span>
+                    <span class="tag-chip"><i class="fas fa-code"></i> Developer</span>
+                    <span class="tag-chip"><i class="fas fa-graduation-cap"></i> Student</span>
+                    <span class="tag-chip"><i class="fas fa-feather-pointed"></i> Badminton Player</span>
+                    <span class="tag-chip"><i class="fas fa-music"></i> Flautist</span>
                 </div>
             </div>
 
             <div class="hero-image">
                 <div class="profile-water-container">
+                    <!-- Ambient Glow Behind Card -->
+                    <div class="hero-ambient-glow"></div>
                     <!-- Rotating gradient border glow -->
                     <div class="logo-border-ring"></div>
                     <!-- Main glass frame card -->
@@ -90,20 +105,43 @@
 
         <!-- Intro Overview -->
         <section class="home-overview reveal delay-1">
-            <h2>Turning Curiosity Into Code</h2>
-            <p>
-                Every project starts with curiosity.
-                This portfolio showcases my journey as a Computer Science undergraduate who enjoys learning new
-                technologies,
-                experimenting with ideas, and continuously improving through hands-on experience.
-                As I learn, build, and grow, this portfolio evolves alongside me.
-            </p>
+            <div class="overview-window-card">
+                <div class="overview-window-header">
+                    <div class="window-controls">
+                        <span class="ctrl-dot"></span>
+                        <span class="ctrl-dot"></span>
+                        <span class="ctrl-dot"></span>
+                    </div>
+                    <span class="window-title-text"><i class="fas fa-terminal"></i> journey.config</span>
+                </div>
+                <div class="overview-window-body">
+                    <div class="overview-prompt-line">
+                        <span class="terminal-prompt">&gt;</span>
+                        <h2 class="overview-title">Where Ideas Evolve Into Real-World Code<span
+                                class="terminal-cursor">_</span></h2>
+                    </div>
+                    <p class="overview-text">
+                        Every project starts with curiosity.
+                        This portfolio showcases my journey as a Computer Science undergraduate who enjoys learning new
+                        technologies,
+                        experimenting with ideas, and continuously improving through hands-on experience.
+                        As I learn, build, and grow, this portfolio evolves alongside me.
+                    </p>
+                </div>
+            </div>
         </section>
 
         <!-- Philosophy Quick Links -->
         <section class="quick-links">
-            <div class="quick-card reveal delay-1">
-                <h3><i class="fas fa-cubes"></i> Building</h3>
+            <div class="quick-card card-building reveal delay-1">
+                <div class="card-top-indicator"></div>
+                <div class="card-header-row">
+                    <div class="card-icon-wrap cyan">
+                        <i class="fas fa-cubes"></i>
+                    </div>
+                    <span class="card-watermark">01</span>
+                </div>
+                <h3>Building</h3>
                 <p>
                     I enjoy transforming ideas into practical projects.
                     Whether it's developing responsive websites, experimenting with programming concepts, or solving
@@ -111,8 +149,15 @@
                 </p>
             </div>
 
-            <div class="quick-card reveal delay-2">
-                <h3><i class="fas fa-book-open"></i> Learning</h3>
+            <div class="quick-card card-learning reveal delay-2">
+                <div class="card-top-indicator"></div>
+                <div class="card-header-row">
+                    <div class="card-icon-wrap purple">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <span class="card-watermark">02</span>
+                </div>
+                <h3>Learning</h3>
                 <p>
                     Technology evolves every day, and so do I.
                     Alongside my B.Tech in Computer Science Engineering,
@@ -121,8 +166,15 @@
                 </p>
             </div>
 
-            <div class="quick-card reveal delay-3">
-                <h3><i class="fas fa-seedling"></i> Growing</h3>
+            <div class="quick-card card-growing reveal delay-3">
+                <div class="card-top-indicator"></div>
+                <div class="card-header-row">
+                    <div class="card-icon-wrap emerald">
+                        <i class="fas fa-seedling"></i>
+                    </div>
+                    <span class="card-watermark">03</span>
+                </div>
+                <h3>Growing</h3>
                 <p>
                     Growth comes from consistency.
                     Every challenge teaches something new, every project improves my confidence, and every experience
@@ -131,11 +183,16 @@
             </div>
         </section>
 
-        <!-- Quote -->
-        <section class="home-quote reveal">
-            <blockquote class="quote">
-                "Driven by curiosity, strengthened through learning, and inspired by building."
-            </blockquote>
+        <!-- Minimal Classy Quote Section -->
+        <section class="home-quote-section reveal">
+            <div class="quote-minimal-ambient"></div>
+            <div class="quote-minimal-container">
+                <span class="quote-minimal-icon" aria-hidden="true">&ldquo;</span>
+                <blockquote class="quote-minimal-text">
+                    Driven by curiosity, strengthened through learning, and inspired by building.
+                </blockquote>
+                <div class="quote-accent-rule"></div>
+            </div>
         </section>
     </main>
 
