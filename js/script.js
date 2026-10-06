@@ -12,15 +12,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 2. Apple-style Navbar Shrink on Scroll
+    // 2. High-Performance RAF-Throttled Scroll Handlers
     const navbar = document.querySelector('.navbar');
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 40) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
+    let backToTopBtn = document.querySelector('.back-to-top');
+    let scrollTicking = false;
+
+    function onScrollTick() {
+        const scrollY = window.scrollY;
+        if (navbar) {
+            if (scrollY > 40) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
         }
-    });
+        if (backToTopBtn) {
+            if (scrollY > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        }
+        scrollTicking = false;
+    }
+
+    window.addEventListener('scroll', () => {
+        if (!scrollTicking) {
+            window.requestAnimationFrame(onScrollTick);
+            scrollTicking = true;
+        }
+    }, { passive: true });
 
     // 3. Mobile Navigation Menu Toggle
     const navToggle = document.querySelector('.nav-toggle');
@@ -176,7 +197,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 8. Dynamic Back to Top Button
-    let backToTopBtn = document.querySelector('.back-to-top');
     if (!backToTopBtn) {
         backToTopBtn = document.createElement('button');
         backToTopBtn.className = 'back-to-top';
@@ -185,18 +205,27 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(backToTopBtn);
     }
 
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 300) {
-            backToTopBtn.classList.add('show');
-        } else {
-            backToTopBtn.classList.remove('show');
-        }
-    });
-
     backToTopBtn.addEventListener('click', () => {
         window.scrollTo({
             top: 0,
             behavior: 'smooth'
+        });
+    });
+
+    // Universal Smooth Scrolling for Internal Anchor Links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            const targetId = this.getAttribute('href');
+            if (targetId && targetId !== '#') {
+                const targetEl = document.querySelector(targetId);
+                if (targetEl) {
+                    e.preventDefault();
+                    targetEl.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            }
         });
     });
 
@@ -392,13 +421,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ===================================================
-    // 12. INTERACTIVE RESUME PAGE CONTROLS
+    // 12. UNIVERSAL PDF.JS RESUME VIEWER & VIEW TOGGLE
     // ===================================================
+    const resumePdfView = document.getElementById('resume-pdf-view');
+    const resumeInteractiveView = document.getElementById('resume-interactive-view');
+    const toggleViewPdf = document.getElementById('toggle-view-pdf');
+    const toggleViewInteractive = document.getElementById('toggle-view-interactive');
     const btnDownloadResume = document.getElementById('btn-download-resume');
     const btnPrintResume = document.getElementById('btn-print-resume');
-    const viewCompactBtn = document.getElementById('view-compact-btn');
-    const viewFullBtn = document.getElementById('view-full-btn');
-    const resumePaper = document.getElementById('resume-paper');
 
     if (btnDownloadResume) {
         btnDownloadResume.addEventListener('click', () => {
@@ -412,20 +442,172 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (viewCompactBtn && viewFullBtn && resumePaper) {
-        viewCompactBtn.addEventListener('click', () => {
-            viewCompactBtn.classList.add('active');
-            viewFullBtn.classList.remove('active');
-            resumePaper.classList.add('compact-mode');
-            showToast('Switched to Compact ATS View');
+    // Toggle between PDF Viewer and Interactive HTML View
+    if (toggleViewPdf && toggleViewInteractive && resumePdfView && resumeInteractiveView) {
+        toggleViewPdf.addEventListener('click', () => {
+            toggleViewPdf.classList.add('active');
+            toggleViewInteractive.classList.remove('active');
+            resumePdfView.style.display = 'flex';
+            resumeInteractiveView.style.display = 'none';
+            showToast('Switched to PDF Viewer', 'fas fa-file-pdf');
         });
 
-        viewFullBtn.addEventListener('click', () => {
-            viewFullBtn.classList.add('active');
-            viewCompactBtn.classList.remove('active');
-            resumePaper.classList.remove('compact-mode');
-            showToast('Switched to Detailed Interactive View');
+        toggleViewInteractive.addEventListener('click', () => {
+            toggleViewInteractive.classList.add('active');
+            toggleViewPdf.classList.remove('active');
+            resumePdfView.style.display = 'none';
+            resumeInteractiveView.style.display = 'block';
+            showToast('Switched to Interactive View', 'fas fa-align-left');
         });
+    }
+
+    // PDF.js Canvas Engine Initialization
+    const pdfRenderArea = document.getElementById('pdf-render-area');
+    const pdfLoading = document.getElementById('pdf-loading');
+    const pdfFallback = document.getElementById('pdf-fallback');
+    const pdfZoomIn = document.getElementById('pdf-zoom-in');
+    const pdfZoomOut = document.getElementById('pdf-zoom-out');
+    const pdfFitWidth = document.getElementById('pdf-fit-width');
+    const pdfZoomLevel = document.getElementById('pdf-zoom-level');
+    const pdfPageNum = document.getElementById('pdf-page-num');
+
+    if (pdfRenderArea) {
+        let currentPdfDoc = null;
+        let baseScale = 1.0;
+        let userZoom = 1.0;
+        let renderingInProgress = false;
+
+        function getFitScale(page) {
+            const containerWidth = pdfRenderArea.clientWidth || 
+                (window.innerWidth > 900 ? 860 : Math.max(window.innerWidth - 48, 280));
+            const unscaledViewport = page.getViewport({ scale: 1.0 });
+            const fit = (containerWidth - 20) / unscaledViewport.width;
+            return Math.min(Math.max(fit, 0.4), 2.2);
+        }
+
+        function renderPdfPage(scaleMultiplier = 1.0) {
+            if (!currentPdfDoc || renderingInProgress) return;
+            renderingInProgress = true;
+
+            currentPdfDoc.getPage(1).then(page => {
+                if (pdfLoading) pdfLoading.classList.add('hidden');
+                if (pdfFallback) pdfFallback.style.display = 'none';
+
+                const computedScale = baseScale * scaleMultiplier;
+                const dpr = Math.min(window.devicePixelRatio || 1, 2.5); // Sharp vector text on high-DPI screens
+                const viewport = page.getViewport({ scale: computedScale });
+
+                let canvas = pdfRenderArea.querySelector('canvas');
+                if (!canvas) {
+                    canvas = document.createElement('canvas');
+                    canvas.className = 'pdf-page-canvas';
+                    pdfRenderArea.appendChild(canvas);
+                }
+
+                canvas.width = Math.floor(viewport.width * dpr);
+                canvas.height = Math.floor(viewport.height * dpr);
+                canvas.style.width = Math.floor(viewport.width) + 'px';
+                canvas.style.height = Math.floor(viewport.height) + 'px';
+
+                const ctx = canvas.getContext('2d');
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+
+                const renderContext = {
+                    canvasContext: ctx,
+                    transform: dpr !== 1 ? [dpr, 0, 0, dpr, 0, 0] : null,
+                    viewport: viewport
+                };
+
+                page.render(renderContext).promise.then(() => {
+                    renderingInProgress = false;
+                    if (pdfZoomLevel) pdfZoomLevel.textContent = `${Math.round(scaleMultiplier * 100)}%`;
+                    if (pdfPageNum) pdfPageNum.innerHTML = `<i class="fas fa-file-alt"></i> Page 1 of ${currentPdfDoc.numPages || 1}`;
+                }).catch(err => {
+                    console.error('Page render error:', err);
+                    renderingInProgress = false;
+                });
+            }).catch(err => {
+                console.error('Get page error:', err);
+                renderingInProgress = false;
+                showPdfFallback();
+            });
+        }
+
+        function showPdfFallback() {
+            if (pdfLoading) pdfLoading.classList.add('hidden');
+            if (pdfFallback) pdfFallback.style.display = 'block';
+        }
+
+        function loadPdf() {
+            if (typeof pdfjsLib === 'undefined') {
+                showPdfFallback();
+                return;
+            }
+
+            try {
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            } catch (e) {
+                console.warn('PDF.js worker setup note:', e);
+            }
+
+            const loadingTask = pdfjsLib.getDocument('resume.pdf');
+            loadingTask.promise.then(pdf => {
+                currentPdfDoc = pdf;
+                pdf.getPage(1).then(page => {
+                    baseScale = getFitScale(page);
+                    userZoom = 1.0;
+                    renderPdfPage(userZoom);
+                });
+            }).catch(err => {
+                console.warn('PDF.js loading failed (possible file:// origin CORS), showing fallback:', err);
+                showPdfFallback();
+            });
+        }
+
+        if (pdfZoomIn) {
+            pdfZoomIn.addEventListener('click', () => {
+                if (userZoom < 2.0) {
+                    userZoom = Math.min(userZoom + 0.2, 2.0);
+                    renderPdfPage(userZoom);
+                }
+            });
+        }
+
+        if (pdfZoomOut) {
+            pdfZoomOut.addEventListener('click', () => {
+                if (userZoom > 0.6) {
+                    userZoom = Math.max(userZoom - 0.2, 0.6);
+                    renderPdfPage(userZoom);
+                }
+            });
+        }
+
+        if (pdfFitWidth) {
+            pdfFitWidth.addEventListener('click', () => {
+                if (!currentPdfDoc) return;
+                currentPdfDoc.getPage(1).then(page => {
+                    baseScale = getFitScale(page);
+                    userZoom = 1.0;
+                    renderPdfPage(userZoom);
+                });
+            });
+        }
+
+        let resizeDebounce;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeDebounce);
+            resizeDebounce = setTimeout(() => {
+                if (currentPdfDoc) {
+                    currentPdfDoc.getPage(1).then(page => {
+                        baseScale = getFitScale(page);
+                        renderPdfPage(userZoom);
+                    });
+                }
+            }, 180);
+        });
+
+        loadPdf();
     }
 
     // ===================================================

@@ -7,6 +7,8 @@
     <title>Yatharth Mishra | Resume</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <!-- Mozilla PDF.js for Universal Mobile & Desktop In-Browser PDF Rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="js/script.js" defer></script>
 </head>
 
@@ -45,33 +47,183 @@
         </ul>
     </nav>
 
-    <h1 class="skills-heading">My <span>Resume</span></h1>
-    <h2>Curriculum Vitae &bull; Manipal Institute of Technology Bengaluru</h2>
-
     <main class="resume-page-wrapper">
-        <!-- Two Clean Action Options Above -->
-        <section class="resume-toolbar centered reveal">
-            <a href="resume.pdf" download="Yatharth_Mishra_Resume.pdf" class="resume-action-btn primary" id="btn-download-resume">
-                <i class="fas fa-file-download"></i> Download PDF
-            </a>
-            <a href="resume.pdf" target="_blank" rel="noopener noreferrer" class="resume-action-btn secondary">
-                <i class="fas fa-external-link-alt"></i> View PDF in New Tab
-            </a>
+        <h1 class="skills-heading">My <span>Resume</span></h1>
+
+        <!-- Action Bar with Download, New Tab and View Switcher -->
+        <section class="resume-toolbar reveal">
+            <div class="resume-toolbar-left">
+                <a href="resume.pdf" download="Yatharth_Mishra_Resume.pdf" class="resume-action-btn primary" id="btn-download-resume">
+                    <i class="fas fa-file-download"></i> Download PDF
+                </a>
+                <a href="resume.pdf" target="_blank" rel="noopener noreferrer" class="resume-action-btn secondary">
+                    <i class="fas fa-external-link-alt"></i> Open in New Tab
+                </a>
+            </div>
+
+            <div class="resume-toolbar-right">
+                <div class="resume-view-toggle">
+                    <button class="view-toggle-btn active" id="toggle-view-pdf">
+                        <i class="fas fa-file-pdf"></i> PDF Viewer
+                    </button>
+                    <button class="view-toggle-btn" id="toggle-view-interactive">
+                        <i class="fas fa-align-left"></i> Interactive
+                    </button>
+                </div>
+            </div>
         </section>
 
-        <!-- Embedded Interactive Chrome-style PDF Viewer -->
-        <section class="resume-pdf-container reveal delay-1">
-            <iframe src="resume.pdf#toolbar=1&navpanes=0&scrollbar=1" class="resume-pdf-frame" title="Yatharth Mishra Official Resume PDF">
-                <div style="padding: 50px 20px; text-align: center; color: var(--text-secondary);">
-                    <i class="fas fa-file-pdf" style="font-size: 3rem; color: var(--accent-cyan); margin-bottom: 16px;"></i>
-                    <p style="margin-bottom: 20px; font-size: 1.1rem; color: var(--text-primary);">
-                        Your browser does not support inline PDF preview.
-                    </p>
-                    <a href="resume.pdf" class="resume-action-btn primary" download="Yatharth_Mishra_Resume.pdf">
-                        <i class="fas fa-download"></i> Download Resume PDF
-                    </a>
+        <!-- 1. PDF.js Responsive Embedded Viewer (Mobile & Desktop Compatible) -->
+        <section class="resume-pdf-container reveal delay-1" id="resume-pdf-view">
+            <div class="pdf-viewer-bar">
+                <div class="pdf-controls-group">
+                    <button class="pdf-control-btn" id="pdf-zoom-out" title="Zoom Out" aria-label="Zoom Out">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <span class="pdf-status-pill" id="pdf-zoom-level">100%</span>
+                    <button class="pdf-control-btn" id="pdf-zoom-in" title="Zoom In" aria-label="Zoom In">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button class="pdf-control-btn" id="pdf-fit-width" title="Fit to Screen" aria-label="Fit to Screen">
+                        <i class="fas fa-arrows-alt-h"></i> Fit
+                    </button>
                 </div>
-            </iframe>
+
+                <div class="pdf-controls-group">
+                    <span class="pdf-status-pill" id="pdf-page-num">
+                        <i class="fas fa-file-alt"></i> Page 1 of 1
+                    </span>
+                </div>
+            </div>
+
+            <div class="pdf-canvas-wrapper" id="pdf-canvas-wrapper">
+                <div class="pdf-loading-overlay" id="pdf-loading">
+                    <div class="pdf-loading-spinner"></div>
+                    <span>Loading Official Resume...</span>
+                </div>
+
+                <div id="pdf-render-area" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+                    <!-- High-DPI Canvas is dynamically appended or rendered here -->
+                </div>
+
+                <!-- Fallback Container if local browser security blocks PDF.js fetch or offline -->
+                <div class="pdf-fallback-card" id="pdf-fallback" style="display: none;">
+                    <i class="fas fa-file-pdf"></i>
+                    <h3>Resume PDF Ready</h3>
+                    <p>Tap below to view or download the complete official resume PDF.</p>
+                    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                        <a href="resume.pdf" class="resume-action-btn primary" download="Yatharth_Mishra_Resume.pdf">
+                            <i class="fas fa-file-download"></i> Download PDF
+                        </a>
+                        <a href="resume.pdf" target="_blank" rel="noopener noreferrer" class="resume-action-btn secondary">
+                            <i class="fas fa-external-link-alt"></i> Open in New Tab
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Responsive Interactive HTML Document View -->
+        <section class="resume-paper reveal delay-1" id="resume-interactive-view" style="display: none;">
+            <header class="resume-candidate-header">
+                <div class="resume-name-title">
+                    <div>
+                        <h1 class="resume-name">Yatharth Mishra</h1>
+                        <p class="resume-title-subtitle">B.Tech Computer Science Engineering &bull; MIT Bengaluru</p>
+                    </div>
+                    <span class="resume-badge-tag"><i class="fas fa-user-graduate"></i> Undergraduate</span>
+                </div>
+
+                <div class="resume-contact-bar">
+                    <a href="https://github.com/yathaartth" target="_blank" rel="noopener noreferrer" class="resume-contact-item">
+                        <i class="fab fa-github"></i> github.com/yathaartth
+                    </a>
+                    <a href="https://www.linkedin.com/in/yatharth-mishra-786a95378/" target="_blank" rel="noopener noreferrer" class="resume-contact-item">
+                        <i class="fab fa-linkedin"></i> LinkedIn
+                    </a>
+                    <span class="resume-contact-item">
+                        <i class="fas fa-map-marker-alt"></i> Bengaluru, Karnataka, India
+                    </span>
+                </div>
+            </header>
+
+            <article class="resume-section">
+                <h3 class="resume-section-heading"><i class="fas fa-bullseye"></i> Objective</h3>
+                <p class="resume-summary-text">
+                    I am a motivated and enthusiastic first-year undergraduate student with a strong interest in new gen technology and AI. Eager to gain hands-on experience, contribute to impactful projects, and grow in a dynamic learning environment. Currently also serving as a member of the Astronomy Club of MIT BLR.
+                </p>
+            </article>
+
+            <article class="resume-section">
+                <h3 class="resume-section-heading"><i class="fas fa-graduation-cap"></i> Education</h3>
+                <div class="resume-entry">
+                    <div class="resume-entry-top">
+                        <h4 class="resume-entry-title">Manipal Institute of Technology &bull; Bengaluru</h4>
+                        <span class="resume-entry-date">2025 &ndash; 2029 (Expected)</span>
+                    </div>
+                    <p class="resume-entry-org">Bachelor of Technology in Computer Science Engineering &bull; <strong>CGPA: 8.38</strong></p>
+                </div>
+
+                <div class="resume-entry">
+                    <div class="resume-entry-top">
+                        <h4 class="resume-entry-title">Prabhat Senior Secondary Public School &bull; Kanpur</h4>
+                        <span class="resume-entry-date">2024</span>
+                    </div>
+                    <p class="resume-entry-org">CBSE Class XII &bull; <strong>Score: 91.2%</strong> &bull; School Rank 1</p>
+                </div>
+
+                <div class="resume-entry">
+                    <div class="resume-entry-top">
+                        <h4 class="resume-entry-title">Dr. Virendra Swarup Education Centre &bull; Kanpur</h4>
+                        <span class="resume-entry-date">2022</span>
+                    </div>
+                    <p class="resume-entry-org">ICSE Class X &bull; <strong>Score: 95.4%</strong> &bull; High Honors</p>
+                </div>
+            </article>
+
+            <article class="resume-section">
+                <h3 class="resume-section-heading"><i class="fas fa-laptop-code"></i> Projects &amp; Academic Work</h3>
+                <div class="resume-projects-grid">
+                    <div class="resume-project-card">
+                        <h4><i class="fas fa-globe"></i> Personal Portfolio Website</h4>
+                        <p>Designed and built a full-stack personal portfolio showcasing web engineering projects, glassmorphic design, and responsive interfaces.</p>
+                        <small style="color: var(--accent-cyan);">HTML5, CSS3, JavaScript (ES6+)</small>
+                    </div>
+
+                    <div class="resume-project-card">
+                        <h4><i class="fas fa-brain"></i> Anvay RAG AI Assistant</h4>
+                        <p>An intelligent Retrieval-Augmented Generation (RAG) assistant built to enhance LLM knowledge retrieval with semantic vector search.</p>
+                        <small style="color: var(--accent-cyan);">Python, LLMs, Vector Search, Embeddings</small>
+                    </div>
+                </div>
+            </article>
+
+            <article class="resume-section">
+                <h3 class="resume-section-heading"><i class="fas fa-tools"></i> Technical &amp; Soft Skills</h3>
+                <div class="resume-skills-block">
+                    <div class="resume-skill-category">
+                        <h4>Programming Languages</h4>
+                        <div class="resume-skill-pills">
+                            <span class="resume-skill-pill">C</span>
+                            <span class="resume-skill-pill">Java</span>
+                            <span class="resume-skill-pill">Python</span>
+                            <span class="resume-skill-pill">HTML5</span>
+                            <span class="resume-skill-pill">CSS3</span>
+                            <span class="resume-skill-pill">JavaScript</span>
+                        </div>
+                    </div>
+                    <div class="resume-skill-category">
+                        <h4>Tools &amp; Capabilities</h4>
+                        <div class="resume-skill-pills">
+                            <span class="resume-skill-pill">Git / GitHub</span>
+                            <span class="resume-skill-pill">Data Visualization</span>
+                            <span class="resume-skill-pill">RAG Systems</span>
+                            <span class="resume-skill-pill">MS Office</span>
+                            <span class="resume-skill-pill">Canva</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
         </section>
     </main>
 
